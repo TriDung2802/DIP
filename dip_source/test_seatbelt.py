@@ -1,7 +1,7 @@
 import os
 import cv2
-from seatbelt_detector import Seatbelt_Detector
-from image_processing import preprocessing_roi
+from dip_and_seatbelt_detection.dip_source.seatbelt_detector import Seatbelt_Detector
+from dip_and_seatbelt_detection.dip_source.image_processing import preprocessing_roi
 def dataset_evaluation(test_dir="test"):
 
     detector = Seatbelt_Detector(min_confidence=0.65)
