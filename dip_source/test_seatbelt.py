@@ -8,7 +8,6 @@ except ModuleNotFoundError:
     from image_processing import preprocessing_roi
     from feature_extraction import seatbelt_line_extraction
 def dataset_evaluation(test_dir=None):
-    # Tự động xác định đường dẫn thư mục 'test' dựa trên vị trí file này
     if test_dir is None:
         base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         test_dir = os.path.join(base_dir, "test")
