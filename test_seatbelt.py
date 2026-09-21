@@ -22,7 +22,7 @@ def dataset_evaluation(test_dir="test"):
         folder_path = os.path.join(test_dir, category)
         
         if not os.path.exists(folder_path):
-            print(f"⚠️  Cảnh báo: Không tìm thấy thư mục {folder_path}")
+            print(f"Cảnh báo: Không tìm thấy thư mục {folder_path}")
             continue
 
         for img_name in os.listdir(folder_path):
@@ -33,7 +33,7 @@ def dataset_evaluation(test_dir="test"):
             chest_roi = cv2.imread(img_path)
             
             if chest_roi is None:
-                print(f"❌ Không thể đọc ảnh: {img_path}")
+                print(f"Không thể đọc ảnh: {img_path}")
                 continue
 
             result = detector.detect(chest_roi)
@@ -57,9 +57,9 @@ def dataset_evaluation(test_dir="test"):
     print("=" * 60)
     if total_images > 0:
         accuracy = (correct_predictions / total_images) * 100
-        print(f"📊 Tổng số ảnh test: {total_images}")
-        print(f"✅ Số dự đoán đúng : {correct_predictions}")
-        print(f"🎯 Accuracy        : {accuracy:.2f}%")
+        print(f"Tổng số ảnh test: {total_images}")
+        print(f"Số dự đoán đúng : {correct_predictions}")
+        print(f" Accuracy        : {accuracy:.2f}%")
     else:
         print("Không tìm thấy dữ liệu ảnh test để đánh giá.")
 
@@ -67,4 +67,4 @@ if __name__ == "__main__":
   
     dataset_evaluation(test_dir="test")
 
-    
+
