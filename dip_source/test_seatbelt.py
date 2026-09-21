@@ -1,8 +1,17 @@
 import os
 import cv2
-from dip_and_seatbelt_detection.dip_source.seatbelt_detector import Seatbelt_Detector
-from dip_and_seatbelt_detection.dip_source.image_processing import preprocessing_roi
-def dataset_evaluation(test_dir="test"):
+
+try:
+    from seatbelt_detector import Seatbelt_Detector
+    from image_processing import preprocessing_roi
+except ModuleNotFoundError:
+    from image_processing import preprocessing_roi
+    from feature_extraction import seatbelt_line_extraction
+def dataset_evaluation(test_dir=None):
+    # Tự động xác định đường dẫn thư mục 'test' dựa trên vị trí file này
+    if test_dir is None:
+        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        test_dir = os.path.join(base_dir, "test")
 
     detector = Seatbelt_Detector(min_confidence=0.65)
 
@@ -51,8 +60,11 @@ def dataset_evaluation(test_dir="test"):
 
             print(f"{img_name:<20} | {gt_str:<12} | {pred_str:<12} | {status_str} (Conf: {confidence})")
 
-            cv2.imshow("Debug ROI", result["debug_image"])
-            cv2.waitKey(0)
+            if "debug_image" in result:
+                cv2.imshow("Debug ROI", result["debug_image"])
+                cv2.waitKey(0)
+    
+    cv2.destroyAllWindows()
 
     print("=" * 60)
     if total_images > 0:
@@ -64,7 +76,4 @@ def dataset_evaluation(test_dir="test"):
         print("Không tìm thấy dữ liệu ảnh test để đánh giá.")
 
 if __name__ == "__main__":
-  
-    dataset_evaluation(test_dir="test")
-
-
+    dataset_evaluation()

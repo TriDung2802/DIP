@@ -2,9 +2,9 @@ import cv2
 
 import numpy as np
 
-from dip_and_seatbelt_detection.dip_source.image_processing import preprocessing_roi
+from image_processing import preprocessing_roi
 
-from dip_and_seatbelt_detection.dip_source.feature_extraction import seatbelt_line_extraction
+from feature_extraction import seatbelt_line_extraction
 
 
 
