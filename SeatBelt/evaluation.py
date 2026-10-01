@@ -1,10 +1,3 @@
-"""
-Cách dùng:
-  1. Chuẩn bị ảnh VÙNG NGỰC (đúng kiểu chest_roi mà P2 sẽ nhận):
-        test/seatbelt/      <- ảnh CÓ thắt dây
-        test/no_seatbelt/   <- ảnh KHÔNG thắt dây
-  2. Chạy file này -> in bảng Đúng/Sai, Accuracy, và lưu ket_qua_danh_gia.csv
-"""
 import csv
 from pathlib import Path
 
