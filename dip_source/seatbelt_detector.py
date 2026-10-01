@@ -86,8 +86,4 @@ if __name__ == "__main__":
 
     detector = Seatbelt_Detector()
 
-    # test_roi = cv2.imread("path_to_test_roi.jpg")
-
-    # result = detector.detect(test_roi)
-
-    # print(result) //seatbelt_detector.py
+   

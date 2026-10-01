@@ -29,5 +29,9 @@ if __name__ == "__main__":
     
     crop_chest("original_img/dip_3.jpg", "test/seatbelt/seatbelt_1.jpg", (0.18, 0.72, 0.48, 0.88))
     crop_chest("original_img/dip_4.jpg", "test/seatbelt/seatbelt_2.jpg", (0.42, 0.88, 0.32, 0.65))
+    crop_chest("original_img/dip_5.jpg", "test/seatbelt/seatbelt_3.jpg", (0.30, 0.58, 0.36, 0.67))
+    crop_chest("original_img/dip_6.jpg", "test/seatbelt/seatbelt_4.jpg", (0.42, 0.88, 0.32, 0.67))
     crop_chest("original_img/dip_1.jpg", "test/no_seatbelt/no_seatbelt_1.jpg", (0.28, 0.70, 0.18, 0.58))
     crop_chest("original_img/dip_2.jpg", "test/no_seatbelt/no_seatbelt_2.jpg", (0.28, 0.62, 0.22, 0.62))
+    crop_chest("original_img/dip_7.jpg", "test/no_seatbelt/no_seatbelt_3.jpg", (0.28, 0.70, 0.18, 0.58))
+    crop_chest("original_img/dip_8.jpg", "test/no_seatbelt/no_seatbelt_4.jpg", (0.28, 0.62, 0.22, 0.62))
