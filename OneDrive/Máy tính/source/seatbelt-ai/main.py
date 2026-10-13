@@ -1,4 +1,3 @@
-
 import tkinter as tk
 
 from person_detection.camera import open_camera
