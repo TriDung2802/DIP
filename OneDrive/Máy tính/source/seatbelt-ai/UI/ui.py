@@ -13,6 +13,16 @@ VAI_TRO = "Người lái"     # tạm cố định; xem ghi chú về P1 trong h
 COOLDOWN_GIAY = 3         # ít nhất 3 giây mới tạo thêm 1 cảnh báo mới
 FONT = "Segoe UI"
 
+TEN_MON_HOC = "Xử lý ảnh số"
+TEN_DE_TAI = "Hệ thống phát hiện thắt dây an toàn qua camera"
+TEN_NHOM = "Nhóm 11"
+
+DANH_SACH_THANH_VIEN = [
+    ("Nguyễn Công Đại Lộc", "24110106"),
+    ("Cao Đỗ Trí Dũng", "24110083"),
+    ("Ngô Trần Ngân Đô", "24110088"),
+]
+
 MAU_DO = "#d62828"
 MAU_XANH = "#1e9e3a"
 MAU_XAM = "gray"
@@ -77,19 +87,36 @@ class SeatbeltUI:
 
         self.su_kien = None               # cảnh báo gần nhất
         self.lan_bao_cuoi = 0.0
-
+        
         root.title("Seatbelt AI")
+        root.state("zoomed")  # Mở cửa sổ ở trạng thái phóng to
+        root.minsize(900, 600) 
         root.protocol("WM_DELETE_WINDOW", self.dong)
         root.bind("<KeyPress-s>", self.luu_co_day)
         root.bind("<KeyPress-n>", self.luu_khong_day)
+        self.dung_header(root)
 
         # --- Bên trái: camera ---
-        self.khung_hinh = tk.Label(root)
-        self.khung_hinh.pack(side="left", padx=10, pady=10)
+        self.khung_hinh = tk.Label(root, bg="black")
+        self.khung_hinh.pack(
+            side="left",
+            padx=10,
+            pady=10,
+            fill="both",
+            expand=True
+        )
 
         # --- Bên phải: trạng thái trực tiếp + thẻ cảnh báo ---
         cot_phai = tk.Frame(root)
-        cot_phai.pack(side="right", fill="y", padx=10, pady=10)
+        cot_phai.configure(width=340)
+        cot_phai.pack_propagate(False)
+        cot_phai.pack(
+            side="right",
+            fill="both",
+            expand=False,
+            padx=10,
+            pady=10
+        )
 
         self.nhan_trang_thai = tk.Label(cot_phai, text="● Đang khởi động...",
                                         font=(FONT, 11, "bold"), anchor="w", fg=MAU_XAM)
@@ -133,7 +160,81 @@ class SeatbeltUI:
         roi = self.frame_hien_tai[y1:y2,x1:x2]
 
         self.ham_luu_khong_day(roi)
-    # ================= dựng thẻ cảnh báo (1 lần) =================
+
+    
+    def dung_header(self, root):
+        """Thanh tiêu đề chứa thông tin môn học, đề tài và nhóm."""
+        header = tk.Frame(
+            root,
+            bg="#1b2a4a",
+            highlightthickness=1,
+            highlightbackground="gray",
+        )
+        header.pack(side="top", fill="x")
+
+        trai = tk.Frame(header, bg="#1b2a4a")
+        trai.pack(
+            side="left",
+            fill="both",
+            expand=True,
+            padx=14,
+            pady=8,
+        )
+
+        tk.Label(
+            trai,
+            text=TEN_MON_HOC,
+            font=(FONT, 13, "bold"),
+            bg="#1b2a4a",
+            fg="white",
+            anchor="w",
+        ).pack(anchor="w")
+
+        tk.Label(
+            trai,
+            text=TEN_DE_TAI,
+            font=(FONT, 10),
+            bg="#1b2a4a",
+            fg="#d8dee9",
+            anchor="w",
+            justify="left",
+            wraplength=320,
+        ).pack(anchor="w")
+
+        tk.Frame(
+            header,
+            bg="gray",
+            width=1,
+        ).pack(side="left", fill="y", pady=8)
+
+        phai = tk.Frame(header, bg="#1b2a4a")
+        phai.pack(
+            side="right",
+            fill="both",
+            expand=True,
+            padx=14,
+            pady=8,
+        )
+
+        tk.Label(
+            phai,
+            text=TEN_NHOM,
+            font=(FONT, 13, "bold"),
+            bg="#1b2a4a",
+            fg="white",
+            anchor="e",
+        ).pack(anchor="e")
+
+        for ho_ten, mssv in DANH_SACH_THANH_VIEN:
+            tk.Label(
+                phai,
+                text=f"{ho_ten} - {mssv}",
+                font=(FONT, 10),
+                bg="#1b2a4a",
+                fg="#d8dee9",
+                anchor="e",
+            ).pack(anchor="e")
+
     def dung_the(self):
         the = self.the
         kw = dict(anchor="w", font=(FONT, 11))
