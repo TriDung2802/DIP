@@ -11,20 +11,23 @@ from algorithm.seatbelt_seg_detector import SeatbeltSegDetector
 from UI.logger import Logger
 from UI.ui import SeatbeltUI
 
-
-detector = SeatbeltSegDetector(min_confidence=0.08)
-
+detector = SeatbeltSegDetector(min_confidence=0.5)
 
 def pipeline(frame):
     persons = detect_people(frame)
+    # không phát hiện người -> không nhận diện dây
+    if not persons:
+        return[]
     results = []
 
     for person in persons:
+        person_image = person.get("person_image")
+        if person_image is None or person_image.size ==0:
+            continue
         result = detector.detect(person["person_image"])
         results.append((person, result))
 
     return results
-
 
 def main():
     cap = open_camera()
@@ -39,9 +42,6 @@ def main():
         luu_co_day=save_seatbelt_image,
         luu_khong_day=save_no_seatbelt_image,
     )
-
     root.mainloop()
-
-
 if __name__ == "__main__":
     main()

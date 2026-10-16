@@ -9,7 +9,7 @@ LAT_HINH = 1          # 1 = gương, 0 = lật dọc, -1 = cả hai, None = khô
 DO_TRE_MS = 30        # ~30 khung hình/giây
 
 TEN_CAMERA = "CAM-01"
-VAI_TRO = "Người lái"     # tạm cố định; xem ghi chú về P1 trong hướng dẫn
+VAI_TRO = "Người lái"
 COOLDOWN_GIAY = 3         # ít nhất 3 giây mới tạo thêm 1 cảnh báo mới
 FONT = "Segoe UI"
 
@@ -33,7 +33,7 @@ def thanh_photoimage(anh, rong):
     if anh.ndim == 2:
         rgb = cv2.cvtColor(anh, cv2.COLOR_GRAY2RGB)
     else:
-        rgb = cv2.cvtColor(anh, cv2.COLOR_BGR2RGB)   # OpenCV=BGR, Tkinter=RGB
+        rgb = cv2.cvtColor(anh, cv2.COLOR_BGR2RGB)
     h, w = rgb.shape[:2]
     rgb = cv2.resize(rgb, (rong, max(1, int(h * rong / w))))
     return ImageTk.PhotoImage(Image.fromarray(rgb))
@@ -69,27 +69,21 @@ def ve_nhan(frame, text, origin, color):
 
 
 class SeatbeltUI:
-    
-    def dong(self):
-        if hasattr(self, "cap"):
-            self.cap.release()
-
-        self.root.destroy()
 
     def __init__(self, root, cap, pipeline, khi_co_su_kien=None, luu_co_day=None, luu_khong_day=None):
         self.root = root
         self.cap = cap
-        self.pipeline = pipeline          # hàm: frame -> [(person, result), ...]
-        self.khi_co_su_kien = khi_co_su_kien   # hàm gọi mỗi khi có cảnh báo mới (vd: logger.ghi)
+        self.pipeline = pipeline
+        self.khi_co_su_kien = khi_co_su_kien
 
         self.ham_luu_co_day = luu_co_day
         self.ham_luu_khong_day = luu_khong_day
 
-        self.su_kien = None               # cảnh báo gần nhất
+        self.su_kien = None
         self.lan_bao_cuoi = 0.0
         
         root.title("Seatbelt AI")
-        root.state("zoomed")  # Mở cửa sổ ở trạng thái phóng to
+        root.state("zoomed")
         root.minsize(900, 600) 
         root.protocol("WM_DELETE_WINDOW", self.dong)
         root.bind("<KeyPress-s>", self.luu_co_day)
@@ -107,8 +101,7 @@ class SeatbeltUI:
         )
 
         # --- Bên phải: trạng thái trực tiếp + thẻ cảnh báo ---
-        cot_phai = tk.Frame(root)
-        cot_phai.configure(width=340)
+        cot_phai = tk.Frame(root, width=340)
         cot_phai.pack_propagate(False)
         cot_phai.pack(
             side="right",
@@ -118,8 +111,9 @@ class SeatbeltUI:
             pady=10
         )
 
-        self.nhan_trang_thai = tk.Label(cot_phai, text="● Đang khởi động...",
-                                        font=(FONT, 11, "bold"), anchor="w", fg=MAU_XAM)
+        self.nhan_trang_thai = tk.Label(
+            cot_phai, text="● Đang khởi động...", font=(FONT, 11, "bold"), anchor="w", fg=MAU_XAM
+        )
         self.nhan_trang_thai.pack(fill="x", pady=(0, 6))
 
         self.the = tk.Frame(cot_phai, highlightthickness=2, highlightbackground=MAU_XAM)
@@ -134,15 +128,12 @@ class SeatbeltUI:
             return
 
         cac_nguoi = self.pipeline(self.frame_hien_tai)
-
         if not cac_nguoi:
-            print("Chưa tìm thấy người")
             return
 
         person = cac_nguoi[0][0]
-        x1,y1,x2,y2 = person["person_box"]
-        roi = self.frame_hien_tai[y1:y2,x1:x2]
-
+        x1, y1, x2, y2 = person["person_box"]
+        roi = self.frame_hien_tai[y1:y2, x1:x2]
         self.ham_luu_co_day(roi)
 
     def luu_khong_day(self, event=None):
@@ -150,20 +141,15 @@ class SeatbeltUI:
             return
 
         cac_nguoi = self.pipeline(self.frame_hien_tai)
-
         if not cac_nguoi:
-            print("Chưa tìm thấy người")
             return
 
         person = cac_nguoi[0][0]
-        x1,y1,x2,y2 = person["person_box"]
-        roi = self.frame_hien_tai[y1:y2,x1:x2]
-
+        x1, y1, x2, y2 = person["person_box"]
+        roi = self.frame_hien_tai[y1:y2, x1:x2]
         self.ham_luu_khong_day(roi)
 
-    
     def dung_header(self, root):
-        """Thanh tiêu đề chứa thông tin môn học, đề tài và nhóm."""
         header = tk.Frame(
             root,
             bg="#1b2a4a",
@@ -237,45 +223,74 @@ class SeatbeltUI:
 
     def dung_the(self):
         the = self.the
-        kw = dict(anchor="w", font=(FONT, 11))
+        kw = dict(anchor="w", font=(FONT, 10))
 
-        self.nhan_tieu_de = tk.Label(the, font=(FONT, 13, "bold"), anchor="w")
-        self.nhan_tieu_de.pack(fill="x", padx=12, pady=(10, 6))
+        # 1. HÀNG NÚT BẤM DƯỚI CÙNG (Luôn cố định vị trí ở đáy)
+        hang_nut = tk.Frame(the)
+        hang_nut.pack(side="bottom", fill="x", padx=10, pady=10)
 
-        # Ảnh nền xám làm chỗ giữ chỗ "[ ẢNH CAMERA ]"
-        self.anh_rong = ImageTk.PhotoImage(Image.new("RGB", (270, 200), "#2b2b2b"))
-        self.nhan_anh = tk.Label(the, image=self.anh_rong, text="[ ẢNH CAMERA ]",
-                                 compound="center", fg="white", font=(FONT, 11))
-        self.nhan_anh.pack(padx=12, pady=6)
+        self.nut = tk.Button(
+            hang_nut,
+            text="XEM CHI TIẾT",
+            font=(FONT, 10, "bold"),
+            bg=MAU_DO,
+            fg="white",
+            activebackground="#a61e1e",
+            activeforeground="white",
+            disabledforeground="#e8b4b4",
+            cursor="hand2",
+            command=self.xem_chi_tiet,
+        )
+        self.nut.pack(side="left", expand=True, fill="x", padx=(0, 4), ipady=6)
 
-        # Ô nhỏ: Người lái / Không thắt dây
-        o = tk.Frame(the, highlightthickness=1, highlightbackground="gray")
-        o.pack(anchor="w", padx=12, pady=6)
-        self.nhan_vai_tro = tk.Label(o, font=(FONT, 11), anchor="w", width=20)
-        self.nhan_vai_tro.pack(padx=6, pady=(4, 0))
-        self.nhan_hanh_vi = tk.Label(o, font=(FONT, 11), anchor="w", width=20)
-        self.nhan_hanh_vi.pack(padx=6, pady=(0, 4))
+        self.nut_chon_anh = tk.Button(
+            hang_nut,
+            text="CHỌN ẢNH",
+            font=(FONT, 10, "bold"),
+            bg="#e1e1e1",
+            fg="black",
+            activebackground="#cccccc",
+            cursor="hand2",
+            command=self.mo_chon_anh,
+        )
+        self.nut_chon_anh.pack(side="right", expand=True, fill="x", padx=(4, 0), ipady=6)
 
-        self.nhan_loai = tk.Label(the, **kw)
-        self.nhan_tin_cay = tk.Label(the, **kw)
-        self.nhan_camera = tk.Label(the, **kw)
-        self.nhan_thoi_gian = tk.Label(the, **kw)
+        # 2. KHUNG NỘI DUNG PHÍA TRÊN
+        khung_tren = tk.Frame(the)
+        khung_tren.pack(side="top", fill="both", expand=True)
+
+        self.nhan_tieu_de = tk.Label(khung_tren, font=(FONT, 11, "bold"), anchor="w")
+        self.nhan_tieu_de.pack(fill="x", padx=10, pady=(6, 2))
+
+        self.anh_rong = ImageTk.PhotoImage(Image.new("RGB", (240, 130), "#2b2b2b"))
+        self.nhan_anh = tk.Label(
+            khung_tren, image=self.anh_rong, text="[ ẢNH CAMERA ]",
+            compound="center", fg="white", font=(FONT, 9)
+        )
+        self.nhan_anh.pack(padx=10, pady=2)
+
+        o = tk.Frame(khung_tren, highlightthickness=1, highlightbackground="gray")
+        o.pack(anchor="w", padx=10, pady=4)
+        self.nhan_vai_tro = tk.Label(o, font=(FONT, 10), anchor="w", width=22)
+        self.nhan_vai_tro.pack(padx=6, pady=(2, 0))
+        self.nhan_hanh_vi = tk.Label(o, font=(FONT, 10), anchor="w", width=22)
+        self.nhan_hanh_vi.pack(padx=6, pady=(0, 2))
+
+        self.nhan_loai = tk.Label(khung_tren, **kw)
+        self.nhan_tin_cay = tk.Label(khung_tren, **kw)
+        self.nhan_camera = tk.Label(khung_tren, **kw)
+        self.nhan_thoi_gian = tk.Label(khung_tren, **kw)
         for nhan in (self.nhan_loai, self.nhan_tin_cay, self.nhan_camera, self.nhan_thoi_gian):
-            nhan.pack(fill="x", padx=12, pady=1)
+            nhan.pack(fill="x", padx=10, pady=1)
 
-        self.nut = tk.Button(the, text="XEM CHI TIẾT", font=(FONT, 11, "bold"),
-                             command=self.xem_chi_tiet)
-        self.nut.pack(pady=12)
-
-    # ================= 2 trạng thái của thẻ =================
     def hien_the_rong(self):
         """Chưa có vi phạm nào."""
         self.the.configure(highlightbackground=MAU_XAM)
         self.nhan_tieu_de.configure(text="Chưa có vi phạm", fg=MAU_XAM)
         self.nhan_anh.configure(image=self.anh_rong, text="[ ẢNH CAMERA ]")
         self.nhan_anh.image = self.anh_rong
-        self.nhan_vai_tro.configure(text="—")
-        self.nhan_hanh_vi.configure(text="—")
+        self.nhan_vai_tro.configure(text="Người lái")
+        self.nhan_hanh_vi.configure(text="Chưa xác định")
         self.nhan_loai.configure(text="Loại vi phạm: —")
         self.nhan_tin_cay.configure(text="Độ tin cậy: —")
         self.nhan_camera.configure(text=f"Camera: {TEN_CAMERA}")
@@ -285,9 +300,11 @@ class SeatbeltUI:
     def hien_the_vi_pham(self, sk):
         self.the.configure(highlightbackground=MAU_DO)
         self.nhan_tieu_de.configure(text="⚠ PHÁT HIỆN VI PHẠM", fg=MAU_DO)
-        anh = thanh_photoimage(sk["anh"], 270)
+        
+        anh = thanh_photoimage(sk["anh"], 240)
         self.nhan_anh.configure(image=anh, text="")
-        self.nhan_anh.image = anh                 # giữ tham chiếu (nếu không ảnh biến mất)
+        self.nhan_anh.image = anh
+
         self.nhan_vai_tro.configure(text=VAI_TRO)
         self.nhan_hanh_vi.configure(text=sk["loai"])
         self.nhan_loai.configure(text=f"Loại vi phạm: {sk['loai']}")
@@ -296,7 +313,6 @@ class SeatbeltUI:
         self.nhan_thoi_gian.configure(text=f"Thời gian: {sk['thoi_gian']}")
         self.nut.configure(state="normal")
 
-    # ================= vòng lặp chính =================
     def cap_nhat(self):
         ok, frame = self.cap.read()
         if ok:
@@ -304,7 +320,7 @@ class SeatbeltUI:
                 frame = cv2.flip(frame, LAT_HINH)
             self.frame_hien_tai = frame.copy()
 
-            cac_nguoi = self.pipeline(frame)              # gọi P1 rồi P2
+            cac_nguoi = self.pipeline(frame)
             for person, result in cac_nguoi:
                 self.ve_khung(frame, person, result)
 
@@ -312,21 +328,20 @@ class SeatbeltUI:
             self.hien_thi_hinh(frame)
             self.hien_trang_thai(cac_nguoi)
 
-        self.root.after(DO_TRE_MS, self.cap_nhat)         # không dùng while True
+        self.root.after(DO_TRE_MS, self.cap_nhat)
 
     def xu_ly_vi_pham(self, frame, cac_nguoi):
-        """Nếu có người không thắt dây -> tạo cảnh báo (có giãn cách COOLDOWN)."""
         vi_pham = [r for _, r in cac_nguoi if not r["seatbelt"]]
         if not vi_pham:
             return
         bay_gio = time.time()
         if bay_gio - self.lan_bao_cuoi < COOLDOWN_GIAY:
-            return                                        # vừa báo xong, chưa báo lại
+            return
         self.lan_bao_cuoi = bay_gio
 
         r = max(vi_pham, key=lambda x: x["confidence"])
         self.su_kien = {
-            "anh": frame.copy(),                          # chụp lại khoảnh khắc vi phạm
+            "anh": frame.copy(),
             "loai": "Không thắt dây",
             "tin_cay": r["confidence"],
             "camera": TEN_CAMERA,
@@ -335,19 +350,13 @@ class SeatbeltUI:
         }
         self.hien_the_vi_pham(self.su_kien)
         if self.khi_co_su_kien is not None:
-            self.khi_co_su_kien(self.su_kien)             # báo cho bên ngoài (logger...)
+            self.khi_co_su_kien(self.su_kien)
 
     def ve_khung(self, frame, person, result):
         x1, y1, x2, y2 = person["person_box"]
         person_color = (255, 0, 0)
 
-        cv2.rectangle(
-            frame,
-            (x1, y1),
-            (x2, y2),
-            person_color,
-            2
-        )
+        cv2.rectangle(frame, (x1, y1), (x2, y2), person_color, 2)
         ve_nhan(frame, "person", (x1, max(0, y1 - 28)), person_color)
 
         polygons = result.get("polygons")
@@ -377,7 +386,6 @@ class SeatbeltUI:
                     2,
                     cv2.LINE_AA,
                 )
-
                 if polygon is largest_polygon:
                     label_position = (
                         int(polygon_on_frame[:, 0].min()),
@@ -408,33 +416,63 @@ class SeatbeltUI:
             chu, mau = "● Đang KHÔNG thắt dây", MAU_DO
         self.nhan_trang_thai.configure(text=chu, fg=mau)
 
+    def mo_chon_anh(self):
+        import subprocess
+        import sys
+        from pathlib import Path
+
+        file_anh_ui = Path(__file__).resolve().parent.parent / "seatbelt_image_ui.py"
+        if not file_anh_ui.exists():
+            from tkinter import messagebox
+            messagebox.showerror("Lỗi", f"Không tìm thấy file:\n{file_anh_ui}")
+            return
+
+        self.dong()
+        subprocess.Popen([sys.executable, str(file_anh_ui)])
+
     def xem_chi_tiet(self):
         sk = self.su_kien
         if sk is None:
             return
+
         cua_so = tk.Toplevel(self.root)
         cua_so.title("Chi tiết vi phạm")
+        cua_so.geometry("700x650")
+        cua_so.minsize(500, 450)
 
-        anh = thanh_photoimage(sk["anh"], 640)
-        nhan = tk.Label(cua_so, image=anh)
-        nhan.image = anh
-        nhan.pack(padx=10, pady=10)
+        main_frame = tk.Frame(cua_so, padx=15, pady=15)
+        main_frame.pack(fill="both", expand=True)
 
-        chu = (f"Đối tượng: {VAI_TRO}\n"
-               f"Loại vi phạm: {sk['loai']}\n"
-               f"Độ tin cậy: {sk['tin_cay']:.1%}\n"
-               f"Camera: {sk['camera']}\n"
-               f"Thời gian: {sk['thoi_gian']}")
-        tk.Label(cua_so, text=chu, font=(FONT, 12), justify="left").pack(padx=10, anchor="w")
+        anh = thanh_photoimage(sk["anh"], 600)
+        nhan_anh = tk.Label(main_frame, image=anh)
+        nhan_anh.image = anh
+        nhan_anh.pack(pady=(0, 10))
 
-        if sk["debug_image"] is not None:                 # ảnh trung gian của Đô (nếu có)
-            tk.Label(cua_so, text="Ảnh trung gian (xử lý ảnh):",
-                     font=(FONT, 11, "bold")).pack(pady=(10, 0))
-            dbg = thanh_photoimage(sk["debug_image"], 320)
-            nd = tk.Label(cua_so, image=dbg)
+        chu = (
+            f"Đối tượng: {VAI_TRO}\n"
+            f"Loại vi phạm: {sk['loai']}\n"
+            f"Độ tin cậy: {sk['tin_cay']:.1%}\n"
+            f"Camera: {sk['camera']}\n"
+            f"Thời gian: {sk['thoi_gian']}"
+        )
+        tk.Label(
+            main_frame, text=chu, font=(FONT, 11), justify="left", anchor="w"
+        ).pack(fill="x", pady=5)
+
+        if sk.get("debug_image") is not None:
+            tk.Label(
+                main_frame,
+                text="Ảnh trung gian (xử lý ảnh):",
+                font=(FONT, 11, "bold"),
+                anchor="w",
+            ).pack(fill="x", pady=(10, 5))
+
+            dbg = thanh_photoimage(sk["debug_image"], 300)
+            nd = tk.Label(main_frame, image=dbg)
             nd.image = dbg
             nd.pack(pady=(0, 10))
 
     def dong(self):
-        self.cap.release()
+        if hasattr(self, "cap") and self.cap is not None:
+            self.cap.release()
         self.root.destroy()
